@@ -46,10 +46,25 @@ def setResJson(resJSON):
         #       text=translations['Language'] + ":     " + translations['Text']).pack()
 
 
+def increase(window):
+    window.fontsize = window.fontsize + 1
+    window.label.config(font=('Arial', window.fontsize))
+
+
+def decrease(window):
+    window.fontsize = window.fontsize - 1
+    window.label.config(font=('Arial', window.fontsize))
+
+
+def on_closing(window, output):
+    if langCodes[output.get()] in caption_windows:
+        del caption_windows[langCodes[output.get()]]
+    window.destroy()
+
 def openNewCapWindow(outputs, master):
     for output in outputs:
         if langCodes[output.get()] not in caption_windows:
-            print(output.get())
+            #print(output.get())
             # Toplevel object which will
             # be treated as a new window
             newWindow = Toplevel(master)
@@ -61,6 +76,27 @@ def openNewCapWindow(outputs, master):
 
             # sets the geometry of toplevel
             newWindow.geometry("600x70")
+            fontFrame = Frame(newWindow)
+            fontFrame.pack()
+
+
+            newWindow.label = Text(newWindow)
+            newWindow.label.tag_config("ok",justify='center')
+            #newWindow.label.configure(state="disabled")
+            #newWindow.label.insert(1.0, 'ergvfdsvvgfcdgtf')
+
+            newWindow.fontsize = 14
+
+            newWindow.label.configure(bg=newWindow.cget('bg'), relief="flat", font=('Arial', newWindow.fontsize))
+            increaseTxtSizeBtn = Button(fontFrame,
+                                text="+",
+                                command=lambda w=newWindow: increase(w))
+            increaseTxtSizeBtn.pack(side=LEFT)
+            decreaseTxtSizeBtn = Button(fontFrame,
+                                text="-",
+                                command=lambda w=newWindow: decrease(w))
+            decreaseTxtSizeBtn.pack(side=LEFT)
+
 
             caption_windows[langCodes[output.get()]] = newWindow
 
@@ -68,19 +104,9 @@ def openNewCapWindow(outputs, master):
             #newWindow.label = Label(newWindow,
             #                       textvariable=newWindow.var)
 
-            newWindow.label = Text(newWindow)
-            newWindow.label.tag_config("ok",justify='center')
-            #newWindow.label.configure(state="disabled")
-            #newWindow.label.insert(1.0, 'ergvfdsvvgfcdgtf')
-
-            newWindow.label.configure(bg=newWindow.cget('bg'), relief="flat")
             newWindow.label.pack()
 
-            def on_closing():
-                del caption_windows[langCodes[output.get()]]
-                newWindow.destroy()
-
-            newWindow.protocol("WM_DELETE_WINDOW", on_closing)
+            newWindow.protocol("WM_DELETE_WINDOW", lambda w=newWindow, o=output: on_closing(w, o))
 
             # A Label widget to show in toplevel
 

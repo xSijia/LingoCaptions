@@ -36,10 +36,9 @@ addOutputBtn = Button(master,
                       text="Add an output",
                       command=loadOutDropDownAndPushOutputs)
 addOutputBtn.pack()
-
+"""
 fontLabel = Label(master, text="Choose Font Size")
 fontLabel.pack()
-
 textFrame = Frame(master)
 buttonExample1 = tk.Button(textFrame, text="small", width=3)
 buttonExample1.pack(side=LEFT)
@@ -48,7 +47,7 @@ buttonExample2.pack(side=LEFT)
 buttonExample3 = tk.Button(textFrame, text="large", width=3)
 buttonExample3.pack(side=LEFT)
 textFrame.pack()
-
+"""
 loadRomanCheckbox(master)
 
 """listenbtn = Button(master,
