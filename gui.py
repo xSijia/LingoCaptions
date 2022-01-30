@@ -2,6 +2,7 @@
 from functions import *
 
 master = Tk()
+master.title('LingoCaptions')
 
 # sets the geometry of main
 # root window

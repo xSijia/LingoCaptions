@@ -21,7 +21,7 @@ except ImportError:
     import sys
     sys.exit(1)
 
-speech_key, service_region = "5dd5a23910f94ccf9f1873db175f58fd", "eastus"
+speech_key, service_region = "0f1dd8e11efb4c87b72f72506dabdec2", "eastus"
 langCodes = {}
 langCodesSource = {}
 caption_windows = {}
@@ -144,7 +144,7 @@ def loadRomanCheckbox(master):
 def loadListenCheckbox(master, callback):
     global listening
     listening = IntVar()
-    listenbox = Checkbutton(master, text="Listening", variable=listening,
+    listenbox = Checkbutton(master, text="Listener\n(Retoggle when Necessary)", variable=listening,
                             command=callback,
                             onvalue=1,
                             offvalue=0)
