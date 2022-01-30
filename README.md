@@ -47,3 +47,6 @@ Note: Azure API key must be replaced in code in order for it to work.
 Implementation: 
 Desktop Application using Python and Tkinter(GUI). 
 Compatible with Python 3.9. Higher versions might not be compatible.
+
+
+https://youtu.be/vVFATnt2V_w
