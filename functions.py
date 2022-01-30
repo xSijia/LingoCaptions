@@ -5,6 +5,10 @@ import json
 import time
 import tkinter.font as tkFont
 import tkinter as tk
+from pypinyin import pinyin
+import pykakasi
+kks = pykakasi.kakasi()
+
 try:
     import azure.cognitiveservices.speech as speechsdk
 except ImportError:
@@ -22,13 +26,20 @@ langCodes = {}
 langCodesSource = {}
 caption_windows = {}
 resJSON = ""
+roman = None
+listening = None
 
 
 def setResJson(resJSON):
     for translations in resJSON['Translation']['Translations']:
         if translations['Language'] in caption_windows:
+            text = translations['Text']
+            if translations['Language'] == 'zh-Hans' and roman.get() == 1:
+                text = ' '.join([p[0] for p in pinyin(text)]) + '\n' + text
+            if translations['Language'] == 'ja' and roman.get() == 1:
+                text = ' '.join([p['hepburn'] for p in kks.convert(text)]) + '\n' + text
             caption_windows[translations['Language']].label.delete(1.0, "end")
-            caption_windows[translations['Language']].label.insert(1.0, translations['Text'])
+            caption_windows[translations['Language']].label.insert(1.0, text)
             caption_windows[translations['Language']].label.tag_add('ok', 1.0, "end")
         print(translations['Language'] + ":     " + translations['Text'])
         # Label(newWindow,
@@ -42,7 +53,7 @@ def openNewCapWindow(outputs, master):
             # Toplevel object which will
             # be treated as a new window
             newWindow = Toplevel(master)
-            newWindow.attributes('-alpha', 0.7)
+            newWindow.attributes('-alpha', 0.85)
 
             # sets the title of the
             # Toplevel widget
@@ -65,6 +76,11 @@ def openNewCapWindow(outputs, master):
             newWindow.label.configure(bg=newWindow.cget('bg'), relief="flat")
             newWindow.label.pack()
 
+            def on_closing():
+                del caption_windows[langCodes[output.get()]]
+                newWindow.destroy()
+
+            newWindow.protocol("WM_DELETE_WINDOW", on_closing)
 
             # A Label widget to show in toplevel
 
@@ -91,6 +107,30 @@ def loadlangcode():
     return langCodes, langCodesSource
 
 
+def loadRomanCheckbox(master):
+    global roman
+    roman = IntVar()
+    romanbtn = Checkbutton(master, text="Romantization On\n(Chinese & Japanese Only)", variable=roman,
+                           onvalue=1,
+                           offvalue=0)
+    romanbtn.pack(pady=5)
+
+def loadListenCheckbox(master, callback):
+    global listening
+    listening = IntVar()
+    listenbox = Checkbutton(master, text="Listening", variable=listening,
+                            command=callback,
+                            onvalue=1,
+                            offvalue=0)
+    listenbox.pack(pady=5)
+
+"""def NativeCapCheckbox(master):
+    roman = IntVar()
+    romanbtn = Checkbutton(master, text="Romantization On\n(Chinese & Japanese Only)", variable=roman,
+                           onvalue=1,
+                           offvalue=0)
+    romanbtn.pack(pady=5)"""
+
 
 def loadSourceDropDown(master):
     # Dropdown menu options
@@ -114,8 +154,20 @@ def loadOutDropDown(master):
 
     # datatype of menu text
     outclicked = StringVar()
+    outclicked.set("Source")
 
-    outclicked.set("Output")
+    dropoutput = OptionMenu(master, outclicked, *output)
+    dropoutput.pack()
+
+    return outclicked
+
+def loadOutDropDownEng(master):
+    # Dropdown menu options
+    output, _ = loadlangcode()
+
+    # datatype of menu text
+    outclicked = StringVar()
+    outclicked.set("English")
 
     dropoutput = OptionMenu(master, outclicked, *output)
     dropoutput.pack()
@@ -132,12 +184,13 @@ def outshow(label, outclicked):
 
 
 def threading(source, outputs):
-    i = langCodesSource[source.get()]
-    j = [langCodes[output.get()] for output in outputs]
-    print(i, j)
-    # Call work function
-    t1 = Thread(target=lambda: translation_continuous_from_mic(i, j))
-    t1.start()
+    if listening.get() == 1:
+        i = langCodesSource[source.get()]
+        j = [langCodes[output.get()] for output in outputs]
+        print(i, j)
+        # Call work function
+        t1 = Thread(target=lambda: translation_continuous_from_mic(i, j))
+        t1.start()
 
 """
 # work function
@@ -179,13 +232,10 @@ def translation_continuous_from_mic(source, outputs):
         #print("{}: {}\n\tTranslations: {}\n\tResult Json: {}".format(
         #    event_type, evt, evt.result.translations.items(), evt.result.json))
 
-    done = False
-
     def stop_cb(evt):
         """callback that signals to stop continuous recognition upon receiving an event `evt`"""
         print('CLOSING on {}'.format(evt))
-        nonlocal done
-        done = True
+        listening.set(0)
 
     # connect callback functions to the events fired by the recognizer
     recognizer.session_started.connect(lambda evt: print('SESSION STARTED: {}'.format(evt)))
@@ -214,8 +264,13 @@ def translation_continuous_from_mic(source, outputs):
 
     # start translation
     recognizer.start_continuous_recognition()
-    while not done:
+    while listening.get() == 1:
         time.sleep(.5)
 
+    print('stopping')
     recognizer.stop_continuous_recognition()
+    global caption_windows
+    for window in caption_windows.values():
+        window.destroy()
+    caption_windows = {}
     # </TranslationContinuous>

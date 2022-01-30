@@ -1,2 +1,7 @@
 azure-cognitiveservices-speech==1.19.0
+Deprecated==1.2.13
+jaconv==0.3
+pykakasi==2.2.1
+pypinyin==0.45.0
 tk==0.1.0
+wrapt==1.13.3

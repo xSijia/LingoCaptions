@@ -5,11 +5,10 @@ master = Tk()
 
 # sets the geometry of main
 # root window
-master.geometry("200x270")
+master.geometry("220x300")
 
 # function to open a new window
 # on a button click
-
 
 
 label = Label(master,
@@ -27,9 +26,15 @@ def loadOutDropDownAndPushOutputs():
     outputs.append(output)
 
 
+def loadOutDropDownAndPushOutputsEng():
+    output = loadOutDropDownEng(frame)
+    outputs.append(output)
+
+
+loadOutDropDownAndPushOutputsEng()
 addOutputBtn = Button(master,
-             text="Add an output",
-             command=loadOutDropDownAndPushOutputs)
+                      text="Add an output",
+                      command=loadOutDropDownAndPushOutputs)
 addOutputBtn.pack()
 
 fontLabel = Label(master, text="Choose Font Size")
@@ -44,15 +49,21 @@ buttonExample3 = tk.Button(textFrame, text="large", width=3)
 buttonExample3.pack(side=LEFT)
 textFrame.pack()
 
-listenbtn = Button(master,
-             text="Start Listening",
-             command=lambda: threading(source, outputs))
-listenbtn.pack(pady=10)
+loadRomanCheckbox(master)
+
+"""listenbtn = Button(master,
+                   text="Start Listening",
+                   command=lambda: threading(source, outputs))
+listenbtn.pack(pady=5)"""
+
+loadListenCheckbox(master,
+                   lambda: threading(source, outputs))
+
 # a button widget which will open a
 # new window on button click
 captionbtn = Button(master,
-             text="Generate Caption",
-             command=lambda: openNewCapWindow(outputs, master))
+                    text="Generate Caption",
+                    command=lambda: openNewCapWindow(outputs, master))
 captionbtn.pack(pady=5)
 # mainloop, runs infinitely
 print(resJSON)
