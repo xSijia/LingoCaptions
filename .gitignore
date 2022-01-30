@@ -1,0 +1,6 @@
+venv
+main.py
+__pycache__
+.idea
+quickstart.py
+
