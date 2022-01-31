@@ -21,13 +21,15 @@ except ImportError:
     import sys
     sys.exit(1)
 
-speech_key, service_region = "0f1dd8e11efb4c87b72f72506dabdec2", "eastus"
+speech_key, service_region = "apikey", "eastus"
 langCodes = {}
 langCodesSource = {}
 caption_windows = {}
 resJSON = ""
 roman = None
 listening = None
+inputDevice = None
+
 
 
 def setResJson(resJSON):
@@ -141,6 +143,14 @@ def loadRomanCheckbox(master):
                            offvalue=0)
     romanbtn.pack(pady=5)
 
+def loadMicInput(master):
+    global inputDevice
+    inputDevice = IntVar()
+    inputDevicebtn = Checkbutton(master, text="On: Microphone\nOff: System Audio", variable=inputDevice,
+                           onvalue=1,
+                           offvalue=0)
+    inputDevicebtn.pack(pady=5)
+
 def loadListenCheckbox(master, callback):
     global listening
     listening = IntVar()
@@ -173,14 +183,13 @@ def loadSourceDropDown(master):
 
     return sourcecli
 
-
 def loadOutDropDown(master):
     # Dropdown menu options
     output, _ = loadlangcode()
 
     # datatype of menu text
     outclicked = StringVar()
-    outclicked.set("Source")
+    outclicked.set("Output")
 
     dropoutput = OptionMenu(master, outclicked, *output)
     dropoutput.pack()
@@ -234,6 +243,7 @@ def threadWin(master):
     openNewCapWindow(master)"""
 
 def translation_continuous_from_mic(source, outputs):
+    global inputDevice
     """performs continuous speech translation from input from an audio file"""
     # <TranslationContinuous>
     # set up translation parameters: source language and target languages
@@ -242,8 +252,12 @@ def translation_continuous_from_mic(source, outputs):
         speech_recognition_language=source,
         target_languages=outputs, voice_name="de-DE-Hedda")
 
-    # audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
     audio_config = speechsdk.audio.AudioConfig(device_name='BlackHole2ch_UID')
+
+    if inputDevice.get() == 1:
+        audio_config = speechsdk.audio.AudioConfig(use_default_microphone=True)
+
+
 
     # Creates a translation recognizer using and audio file as input.
     recognizer = speechsdk.translation.TranslationRecognizer(

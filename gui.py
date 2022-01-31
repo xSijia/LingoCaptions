@@ -49,6 +49,8 @@ buttonExample3 = tk.Button(textFrame, text="large", width=3)
 buttonExample3.pack(side=LEFT)
 textFrame.pack()
 """
+loadMicInput(master)
+
 loadRomanCheckbox(master)
 
 """listenbtn = Button(master,
